@@ -26,6 +26,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+          
+      - name: Diagnose project structure
+        run: |
+          echo "===== CURRENT DIRECTORY ====="
+          pwd
+
+          echo "===== ROOT FILES ====="
+          ls -la
+
+          echo "===== DIRECTORY TREE ====="
+          find . -maxdepth 4 -type d | sort
+
+          echo "===== IMPORTANT PYTHON FILES ====="
+          find . -maxdepth 5 -type f \( \
+            -name "loader.py" -o \
+            -name "entry_confirmation.py" -o \
+            -name "market_structure.py" -o \
+            -name "snr_snd_detector.py" \
+          \) -print
+
+          echo "===== PYTHON IMPORT PATH ====="
+          python -c "import sys; print('\n'.join(sys.path))"
+
+
       - name: Run pytest
         env:
           PYTHONPATH: ${{ github.workspace }}
