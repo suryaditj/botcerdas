@@ -1,32 +1,21 @@
-name: Unit Tests & Backtest
+name: Unit Tests
 
 on:
   push:
-    branches: ["main", "master"]
-  pull_request:
-    branches: ["main", "master"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run pytest
+      - run: python -m pip install --upgrade pip && pip install -r requirements.txt
+      - run: pytest -v
         env:
           TWELVE_DATA_API_KEY: "ci_dummy_key"
           TELEGRAM_BOT_TOKEN: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
           PUBLIC_ACCESS: "true"
-        run: pytest -v
