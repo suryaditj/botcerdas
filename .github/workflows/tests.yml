@@ -1,3 +1,4 @@
+
 name: Unit Tests & Backtest
 
 on:
@@ -10,6 +11,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,7 +28,8 @@ jobs:
 
       - name: Run pytest
         env:
+          PYTHONPATH: ${{ github.workspace }}
           TWELVE_DATA_API_KEY: "ci_dummy_key"
           TELEGRAM_BOT_TOKEN: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
           PUBLIC_ACCESS: "true"
-        run: pytest -v
+        run: python -m pytest -v
