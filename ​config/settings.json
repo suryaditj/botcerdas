@@ -1,0 +1,80 @@
+{
+  "bot": {
+    "name": "MTF SNR/SND Analysis Bot",
+    "public_access": true,
+    "log_level": "INFO",
+    "log_dir": "logs",
+    "lock_file": "logs/.bot_instance.lock"
+  },
+  "markets": {
+    "XAUUSD": {
+      "twelve_data_symbol": "XAU/USD",
+      "price_precision": 2,
+      "tick_size": 0.01,
+      "sl_buffer_ticks": 15
+    },
+    "BTCUSD": {
+      "twelve_data_symbol": "BTC/USD",
+      "price_precision": 2,
+      "tick_size": 0.1,
+      "sl_buffer_ticks": 25
+    }
+  },
+  "methods": {
+    "SCALPING": {
+      "timeframes": ["H1", "M15"],
+      "refresh_interval_seconds": 60
+    },
+    "ENTRY_DAY": {
+      "timeframes": ["H4", "H1", "M5"],
+      "refresh_interval_seconds": 60
+    }
+  },
+  "api": {
+    "base_url": "https://api.twelvedata.com/time_series",
+    "timezone": "UTC",
+    "default_outputsize": 250,
+    "timeout_seconds": 15.0,
+    "max_retries": 3,
+    "backoff_base_seconds": 1.5
+  },
+  "cache": {
+    "ttl_seconds": 60
+  },
+  "validation": {
+    "min_candles": 60,
+    "max_gap_tolerance": 3,
+    "max_stale_multiplier": 2.0
+  },
+  "market_structure": {
+    "left_bars": 3,
+    "right_bars": 2,
+    "close_break_buffer": 0.0
+  },
+  "zones": {
+    "atr_period": 14,
+    "max_base_candles": 3,
+    "min_leg_atr_mult": 1.1,
+    "min_departure_atr_mult": 1.5,
+    "max_zone_atr_mult": 2.5,
+    "max_base_body_to_atr": 0.85,
+    "snr_band_atr_mult": 0.25,
+    "touch_tolerance": 0.0,
+    "min_quality_score": 55.0,
+    "max_active_per_side": 3
+  },
+  "entry_confirmation": {
+    "min_confirmation_score": 1.5,
+    "weights": {
+      "rejection_pin_bar": 1.5,
+      "engulfing": 1.5,
+      "strong_displacement": 1.5,
+      "momentum_candle": 1.0
+    }
+  },
+  "risk": {
+    "min_rr_ratio": 1.5,
+    "tp2_fallback_rr_mult": 2.5,
+    "sl_atr_buffer_mult": 0.15
+  }
+}
