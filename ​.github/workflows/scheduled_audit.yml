@@ -65,4 +65,3 @@ jobs:
                           timeout=15,
                       )
                       r.raise_for_status()
-          '
