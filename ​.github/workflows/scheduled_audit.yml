@@ -25,6 +25,7 @@ jobs:
 
       - name: Run MTF analysis & optional Telegram report
         env:
+        PYTHONPATH: "."
           TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           BROADCAST_CHAT_ID: ${{ secrets.BROADCAST_CHAT_ID }}
