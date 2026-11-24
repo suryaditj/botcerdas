@@ -1,1 +1,69 @@
 
+name: Scheduled MTF Analysis
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run MTF analysis & optional Telegram report
+        env:
+          TWELVE_DATA_API_KEY: ${{ secrets.TWELVE_DATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          BROADCAST_CHAT_ID: ${{ secrets.BROADCAST_CHAT_ID }}
+          PUBLIC_ACCESS: "true"
+        run: |
+          python -c '
+          import os
+          import requests
+          from config.loader import load_config
+          from data.twelve_data_client import TwelveDataClient
+          from engine.mtf_analyzer import MultiTimeframeAnalyzer
+          from telegram_bot.formatter import format_analysis_message
+          from utils.logger import setup_logger
+
+          td_key = os.environ.get("TWELVE_DATA_API_KEY", "").strip()
+          tg_token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+          chat_id = os.environ.get("BROADCAST_CHAT_ID", "").strip()
+
+          if not td_key or not tg_token:
+              print("Secret belum lengkap, melewati eksekusi API.")
+              raise SystemExit(0)
+
+          cfg = load_config(settings_path="config/settings.json", require_secrets=True)
+          logger = setup_logger(name="gh_audit", log_dir=cfg.log_dir, level_name=cfg.log_level)
+          client = TwelveDataClient(config=cfg, logger=logger)
+          analyzer = MultiTimeframeAnalyzer(config=cfg, data_client=client, logger=logger)
+
+          for sym in ("XAUUSD", "BTCUSD"):
+              m_cfg = cfg.get_market(sym)
+              for meth in ("SCALPING", "ENTRY_DAY"):
+                  out = analyzer.analyze(symbol=sym, method=meth, force_refresh=False)
+                  logger.info("AUDIT %s %s -> %s", sym, meth, out.status.value)
+                  if chat_id:
+                      msg = format_analysis_message(out, m_cfg)
+                      r = requests.post(
+                          f"https://api.telegram.org/bot{tg_token}/sendMessage",
+                          json={"chat_id": chat_id, "text": msg},
+                          timeout=15,
+                      )
+                      r.raise_for_status()
+          '
